@@ -6,23 +6,8 @@
   <p align="center">Pembuatan Website yang menarik dan user friendly untuk gen baby boomers</p>
 </p>
 
-<p align="center">
-  <a href="https://github.com/[username-anda]/[repo-anda]/actions">
-    <img src="https://github.com/[username-anda]/[repo-anda]/workflows/tests/badge.svg" alt="Build Status">
-  </a>
-  <a href="https://packagist.org/packages/[vendor/package]">
-    <img src="https://img.shields.io/packagist/dt/[vendor/package]" alt="Total Downloads">
-  </a>
-  <a href="https://packagist.org/packages/[vendor/package]">
-    <img src="https://img.shields.io/packagist/v/[vendor/package]" alt="Latest Stable Version">
-  </a>
-  <a href="LICENSE.md">
-    <img src="https://img.shields.io/badge/license-MIT-brightgreen" alt="MIT License">
-  </a>
-</p>
-
 <div align="center">
-  <img src="https://via.placeholder.com/800x400?text=Screenshot+Aplikasi" alt="Screenshot">
+  <img src="https://github.com/user-attachments/assets/f8fc768b-26c8-44fe-8bc2-a49a343ca19a" alt="Screenshot">
 </div>
 
 ## 📦 Persyaratan Sistem
