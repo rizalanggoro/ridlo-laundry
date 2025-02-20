@@ -2,8 +2,8 @@
   <a href="https://laravel.com" target="_blank">
     <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo">
   </a>
-  <h1 align="center">✨ [Nama Proyek Anda] ✨</h1>
-  <p align="center">Deskripsi singkat yang menarik tentang proyek Anda</p>
+  <h1 align="center">✨ AlmadaLaundry ✨</h1>
+  <p align="center">Pembuatan Website yang menarik dan user friendly untuk gen baby boomers</p>
 </p>
 
 <p align="center">
