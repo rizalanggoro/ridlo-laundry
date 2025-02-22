@@ -16,4 +16,7 @@ Route::middleware('api')->group(function () {
         Route::patch('/{order}/status', [OrderController::class, 'updateStatus']);
         Route::get('/barcode/{barcode}', [OrderController::class, 'getByBarcode']);
     });
+    Route::prefix('customers')->group(function () {
+        Route::get('/check/{phone}', [OrderController::class, 'checkCustomer']);
+    });
 });

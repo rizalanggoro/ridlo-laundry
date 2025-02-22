@@ -63,26 +63,8 @@ class OrderController extends BaseController
     public function store(Request $request)
     {
         try {
-            $validated = $request->validate([
-                'phone' => 'required|exists:customers,phone',
-                'laundry_id' => 'required|exists:laundries,id',
-                'type' => 'required|in:regular,express',
-                'weight' => 'required|numeric|min:0',
-                'total_price' => 'required|numeric|min:0',
-                'note' => 'nullable|string'
-            ]);
+            $phone = $this->formatPhoneNumber($request->phone);
 
-            // Format nomor telepon
-            $phone = $request->phone;
-            if (str_starts_with($phone, '08')) {
-                $phone = substr($phone, 1); // Ambil angka setelah '0'
-            } else if (str_starts_with($phone, '628')) {
-                $phone = substr($phone, 2); // Ambil angka setelah '62'
-            } else if (str_starts_with($phone, '+628')) {
-                $phone = substr($phone, 3); // Ambil angka setelah '+62'
-            }
-
-            // format akhir selalu 8xxx...
             if (!str_starts_with($phone, '8')) {
                 return response()->json([
                     'success' => false,
@@ -92,14 +74,29 @@ class OrderController extends BaseController
 
             $customer = Customer::where('phone', $phone)->first();
 
+            $rules = [
+                'phone' => 'required',
+                'laundry_id' => 'required|exists:laundries,id',
+                'type' => 'required|in:regular,express',
+                'weight' => 'required|numeric|min:0',
+                'total_price' => 'required|numeric|min:0',
+                'note' => 'nullable|string'
+            ];
+
             if (!$customer) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Customer not found with this phone number'
-                ], 404);
+                $rules['name'] = 'required|string';
             }
 
-            $orderData = [
+            $validated = $request->validate($rules);
+
+            if (!$customer) {
+                $customer = Customer::create([
+                    'name' => $validated['name'],
+                    'phone' => $phone
+                ]);
+            }
+
+            $order = Order::create([
                 'customer_id' => $customer->id,
                 'laundry_id' => $validated['laundry_id'],
                 'type' => $validated['type'],
@@ -108,15 +105,12 @@ class OrderController extends BaseController
                 'note' => $validated['note'] ?? null,
                 'barcode' => 'ORD-' . uniqid(),
                 'status' => 'pending'
-            ];
-
-            $order = Order::create($orderData);
-            $order->load(['customer', 'laundry']);
+            ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Order created successfully',
-                'data' => new OrderResource($order)
+                'data' => new OrderResource($order->load(['customer', 'laundry']))
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
@@ -126,6 +120,40 @@ class OrderController extends BaseController
             ], 500);
         }
     }
+
+    public function checkCustomer($phone)
+    {
+        $phone = $this->formatPhoneNumber($phone);
+
+        if (!str_starts_with($phone, '8')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid phone number format'
+            ], 422);
+        }
+
+        $customer = Customer::where('phone', $phone)->first();
+
+        return response()->json([
+            'success' => (bool)$customer,
+            'data' => $customer ?: null,
+            'message' => $customer ? null : 'Customer not found'
+        ], $customer ? 200 : 404);
+    }
+
+    private function formatPhoneNumber($phone)
+    {
+        $prefixes = ['08', '628', '+628'];
+
+        foreach ($prefixes as $prefix) {
+            if (str_starts_with($phone, $prefix)) {
+                return substr($phone, strlen($prefix) - 1);
+            }
+        }
+
+        return $phone;
+    }
+
 
 
     public function updateStatus(Request $request, Order $order)
