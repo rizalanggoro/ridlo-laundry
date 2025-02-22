@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller as BaseController;
 use App\Http\Resources\OrderResource;
+use App\Models\Customer;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -61,29 +62,71 @@ class OrderController extends BaseController
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'laundry_id' => 'required|exists:laundries,id',
-            'type' => 'required|in:regular,express',
-            'weight' => 'required|numeric|min:0',
-            'total_price' => 'required|numeric|min:0',
-            'note' => 'nullable|string'
-        ]);
+        try {
+            $validated = $request->validate([
+                'phone' => 'required|exists:customers,phone',
+                'laundry_id' => 'required|exists:laundries,id',
+                'type' => 'required|in:regular,express',
+                'weight' => 'required|numeric|min:0',
+                'total_price' => 'required|numeric|min:0',
+                'note' => 'nullable|string'
+            ]);
 
-        // Generate unique barcode
-        $validated['barcode'] = 'ORD-' . uniqid();
-        // Set initial status
-        $validated['status'] = 'pending';
+            // Format nomor telepon
+            $phone = $request->phone;
+            if (str_starts_with($phone, '08')) {
+                $phone = substr($phone, 1); // Ambil angka setelah '0'
+            } else if (str_starts_with($phone, '628')) {
+                $phone = substr($phone, 2); // Ambil angka setelah '62'
+            } else if (str_starts_with($phone, '+628')) {
+                $phone = substr($phone, 3); // Ambil angka setelah '+62'
+            }
 
-        $order = Order::create($validated);
-        $order->load(['customer', 'laundry']);
+            // format akhir selalu 8xxx...
+            if (!str_starts_with($phone, '8')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid phone number format'
+                ], 422);
+            }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Order created successfully',
-            'data' => new OrderResource($order)
-        ], 201);
+            $customer = Customer::where('phone', $phone)->first();
+
+            if (!$customer) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Customer not found with this phone number'
+                ], 404);
+            }
+
+            $orderData = [
+                'customer_id' => $customer->id,
+                'laundry_id' => $validated['laundry_id'],
+                'type' => $validated['type'],
+                'weight' => $validated['weight'],
+                'total_price' => $validated['total_price'],
+                'note' => $validated['note'] ?? null,
+                'barcode' => 'ORD-' . uniqid(),
+                'status' => 'pending'
+            ];
+
+            $order = Order::create($orderData);
+            $order->load(['customer', 'laundry']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order created successfully',
+                'data' => new OrderResource($order)
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create order',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+
 
     public function updateStatus(Request $request, Order $order)
     {

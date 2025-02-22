@@ -15,5 +15,5 @@ Route::middleware('api')->group(function () {
         Route::get('/{order}', [OrderController::class, 'show']);
         Route::patch('/{order}/status', [OrderController::class, 'updateStatus']);
         Route::get('/barcode/{barcode}', [OrderController::class, 'getByBarcode']);
-    });
+    });
 });
