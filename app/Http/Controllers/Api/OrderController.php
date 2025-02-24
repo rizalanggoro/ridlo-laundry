@@ -18,8 +18,10 @@ class OrderController extends BaseController
 
         // Filter by status
         if ($request->has('status')) {
-            $query->where('status', $request->status);
+            $statuses = explode(',', $request->status);
+            $query->whereIn('status', $statuses);
         }
+
 
         // Filter by type
         if ($request->has('type')) {
@@ -45,7 +47,7 @@ class OrderController extends BaseController
         $query->orderBy($sortField, $sortDirection);
 
         // Pagination
-        $perPage = $request->get('per_page', 10);
+        $perPage = $request->get('per_page', 5);
         $orders = $query->paginate($perPage);
 
         return response()->json([
@@ -154,8 +156,6 @@ class OrderController extends BaseController
         return $phone;
     }
 
-
-
     public function updateStatus(Request $request, Order $order)
     {
         $validated = $request->validate([
@@ -202,5 +202,23 @@ class OrderController extends BaseController
             'success' => true,
             'data' => new OrderResource($order)
         ], 200);
+    }
+
+    public function destroy(Order $order)
+    {
+        try {
+            $order->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete order',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
