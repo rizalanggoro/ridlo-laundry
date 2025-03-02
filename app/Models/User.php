@@ -12,7 +12,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasUuids,HasApiTokens;
+    use HasFactory, Notifiable, HasUuids, HasApiTokens;
 
     public $incrementing = false;
 
@@ -39,7 +39,7 @@ class User extends Authenticatable
 
     /**
      * Get the laundry that owns the user.
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function laundry()

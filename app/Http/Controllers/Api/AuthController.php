@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -31,7 +32,9 @@ class AuthController extends BaseController
         $input = $request->all();
         $input['password'] = Hash::make($input["password"]);
         $user = User::create($input);
-        $success["token"] = $user->createToken("Web-Laundry")->plainTextToken;
+        $tokenName = $user->name . '-' . $user->role . '-android-laundry-' . Carbon::now()->translatedFormat('d-m-Y-H-i-s');
+
+        $success["token"] = $user->createToken($tokenName)->plainTextToken;
         $success["name"] = $user->name;
 
         return $this->sendResponse($success, 'User Berhasil Registrasi');
@@ -41,9 +44,13 @@ class AuthController extends BaseController
     {
         $email = $request->email;
         $password = $request->password;
+
         if (Auth::attempt(['email' => $email, 'password' => $password])) {
             $user = Auth::user();
-            $success["token"] = $user->createToken('Web-Laundry')->plainTextToken;
+
+            $tokenName = $user->name . '-' . $user->role . '-android-laundry-' . Carbon::now()->translatedFormat('d-m-Y-H-i-s');
+
+            $success["token"] = $user->createToken($tokenName)->plainTextToken;
             $success["name"] = $user->name;
 
             return $this->sendResponse($success, 'User Berhasil Login');
