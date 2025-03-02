@@ -14,7 +14,8 @@ class OrderController extends BaseController
 {
     public function index(Request $request)
     {
-        $query = Order::with(['customer', 'laundry']);
+        $query = Order::with(['customer', 'laundry'])
+            ->where('laundry_id', $request->user()->laundry_id);
 
         // Filter by status
         if ($request->has('status')) {
@@ -90,6 +91,14 @@ class OrderController extends BaseController
             }
 
             $validated = $request->validate($rules);
+
+            // Validasi bahwa laundry_id sesuai dengan pengguna yang login
+            if ($validated['laundry_id'] !== $request->user()->laundry_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized: Invalid laundry ID'
+                ], 403);
+            }
 
             if (!$customer) {
                 $customer = Customer::create([

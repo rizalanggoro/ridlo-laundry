@@ -8,8 +8,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
 });
-
-Route::middleware('api')->group(function () {
+Route::middleware(['api', 'auth:sanctum'])->group(function () {
     Route::prefix('orders')->group(function () {
         Route::get('/', [OrderController::class, 'index']);
         Route::post('/', [OrderController::class, 'store']);
@@ -23,9 +22,9 @@ Route::middleware('api')->group(function () {
     });
 });
 
-Route::controller(AuthController::class)->group(function(){
-    Route::post('register','register')->name('register');
-    Route::post('login','login')->name('login');
-    Route::middleware('auth:sanctum')->post('logout','logout')->name('logout');
-    Route::middleware('auth:sanctum')->put('updateProfile','updateProfile')->name('updateProfile');
+Route::controller(AuthController::class)->group(function () {
+    Route::post('register', 'register')->name('register');
+    Route::post('login', 'login')->name('login');
+    Route::middleware('auth:sanctum')->post('logout', 'logout')->name('logout');
+    Route::middleware('auth:sanctum')->put('updateProfile', 'updateProfile')->name('updateProfile');
 });

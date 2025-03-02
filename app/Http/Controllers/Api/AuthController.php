@@ -34,24 +34,37 @@ class AuthController extends BaseController
         $user = User::create($input);
         $tokenName = $user->name . '-' . $user->role . '-android-laundry-' . Carbon::now()->translatedFormat('d-m-Y-H-i-s');
 
-        $success["token"] = $user->createToken($tokenName)->plainTextToken;
-        $success["name"] = $user->name;
+        $success = [
+            'token' => $user->createToken($tokenName)->plainTextToken,
+            'name' => $user->name,
+            'role' => $user->role,
+            'laundry_id' => $user->laundry_id
+        ];
 
         return $this->sendResponse($success, 'User Berhasil Registrasi');
     }
 
     public function login(Request $request)
     {
-        $email = $request->email;
-        $password = $request->password;
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|string'
+        ]);
 
-        if (Auth::attempt(['email' => $email, 'password' => $password])) {
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error', $validator->errors());
+        }
+
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $user = Auth::user();
-
             $tokenName = $user->name . '-' . $user->role . '-android-laundry-' . Carbon::now()->translatedFormat('d-m-Y-H-i-s');
 
-            $success["token"] = $user->createToken($tokenName)->plainTextToken;
-            $success["name"] = $user->name;
+            $success = [
+                'token' => $user->createToken($tokenName)->plainTextToken,
+                'name' => $user->name,
+                'role' => $user->role,
+                'laundry_id' => $user->laundry_id
+            ];
 
             return $this->sendResponse($success, 'User Berhasil Login');
         } else {
@@ -63,13 +76,12 @@ class AuthController extends BaseController
     {
         try {
             $request->user()->currentAccessToken()->delete();
-
             return $this->sendResponse([], 'User Berhasil Logout');
         } catch (\Throwable $th) {
-            echo ($th->getMessage());
-            return $this->sendError('Gagal Logout');
+            return $this->sendError('Gagal Logout', ['error' => $th->getMessage()]);
         }
     }
+
     public function updateProfile(Request $request)
     {
         try {
