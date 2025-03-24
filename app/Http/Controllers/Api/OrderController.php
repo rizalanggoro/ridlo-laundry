@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class OrderController extends BaseController
 {
@@ -17,12 +18,14 @@ class OrderController extends BaseController
         $query = Order::with(['customer', 'laundry'])
             ->where('laundry_id', $request->user()->laundry_id);
 
+        $thirtyDaysAgo = date('Y-m-d', strtotime('-30 days'));
+        $query->whereDate('order_date', '>=', $thirtyDaysAgo);
+
         // Filter by status
         if ($request->has('status')) {
             $statuses = explode(',', $request->status);
             $query->whereIn('status', $statuses);
         }
-
 
         // Filter by type
         if ($request->has('type')) {
@@ -31,7 +34,7 @@ class OrderController extends BaseController
 
         // Filter by date range
         if ($request->has('start_date') && $request->has('end_date')) {
-            $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
+            $query->whereBetween('order_date', [$request->start_date, $request->end_date]);
         }
 
         // Search by customer name or phone
@@ -83,7 +86,8 @@ class OrderController extends BaseController
                 'type' => 'required|in:regular,express',
                 'weight' => 'required|numeric|min:0',
                 'total_price' => 'required|numeric|min:0',
-                'note' => 'nullable|string'
+                'note' => 'nullable|string',
+                'order_date' => 'required|date_format:Y-m-d H:i:s'
             ];
 
             if (!$customer) {
@@ -115,7 +119,8 @@ class OrderController extends BaseController
                 'total_price' => $validated['total_price'],
                 'note' => $validated['note'] ?? null,
                 'barcode' => 'ORD-' . uniqid(),
-                'status' => 'pending'
+                'status' => 'pending',
+                'order_date' => now(),
             ]);
 
             return response()->json([
@@ -132,37 +137,12 @@ class OrderController extends BaseController
         }
     }
 
-    public function checkCustomer($phone)
+    public function show(Order $order)
     {
-        $phone = $this->formatPhoneNumber($phone);
-
-        if (!str_starts_with($phone, '8')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid phone number format'
-            ], 422);
-        }
-
-        $customer = Customer::where('phone', $phone)->first();
-
         return response()->json([
-            'success' => (bool)$customer,
-            'data' => $customer ?: null,
-            'message' => $customer ? null : 'Customer not found'
-        ], $customer ? 200 : 404);
-    }
-
-    private function formatPhoneNumber($phone)
-    {
-        $prefixes = ['08', '628', '+628'];
-
-        foreach ($prefixes as $prefix) {
-            if (str_starts_with($phone, $prefix)) {
-                return substr($phone, strlen($prefix) - 1);
-            }
-        }
-
-        return $phone;
+            'success' => true,
+            'data' => new OrderResource($order->load(['customer', 'laundry']))
+        ], 200);
     }
 
     public function updateStatus(Request $request, Order $order)
@@ -175,22 +155,10 @@ class OrderController extends BaseController
             'status' => $validated['status']
         ]);
 
-        $order->load(['customer', 'laundry']);
-
         return response()->json([
             'success' => true,
             'message' => 'Order status updated successfully',
-            'data' => new OrderResource($order)
-        ], 200);
-    }
-
-    public function show(Order $order)
-    {
-        $order->load(['customer', 'laundry']);
-
-        return response()->json([
-            'success' => true,
-            'data' => new OrderResource($order)
+            'data' => new OrderResource($order->load(['customer', 'laundry']))
         ], 200);
     }
 
@@ -213,6 +181,25 @@ class OrderController extends BaseController
         ], 200);
     }
 
+    public function checkCustomer(Request $request, $phone)
+    {
+        $customer = Customer::where('phone', $phone)->first();
+
+        if (!$customer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Customer not found',
+            ], 404);
+        }
+
+        $orders = Order::where('customer_id', $customer->id)->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => OrderResource::collection($orders),
+        ], 200);
+    }
+
     public function destroy(Order $order)
     {
         try {
@@ -229,5 +216,18 @@ class OrderController extends BaseController
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    private function formatPhoneNumber($phone)
+    {
+        $prefixes = ['08', '628', '+628'];
+
+        foreach ($prefixes as $prefix) {
+            if (str_starts_with($phone, $prefix)) {
+                return substr($phone, strlen($prefix) - 1);
+            }
+        }
+
+        return $phone;
     }
 }

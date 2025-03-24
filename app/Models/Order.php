@@ -17,7 +17,8 @@ class Order extends Model
         'barcode',
         'weight',
         'total_price',
-        'note'
+        'note',
+        'order_date'
     ];
 
     public function customer()
