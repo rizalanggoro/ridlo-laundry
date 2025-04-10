@@ -4,10 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 
-// Halaman Utama
+// Halaman Landing Page
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('home'); // Ganti dari 'welcome' ke 'home'
+})->name('home');
 
 // Auth Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
