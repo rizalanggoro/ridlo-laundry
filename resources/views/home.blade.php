@@ -207,15 +207,16 @@
     </div>
 
     <nav class="menu-container">
-        <div class="logo"><b>ALMADA LAUNDRY</b></div>
+        <div class="logo">ALMADA LAUNDRY</div>
         <div class="menu">
-            <a href="#">HOME</a>
-            <a href="#">ABOUT US</a>
-            <a href="#">SERVICES</a>
-            <a href="#">PRICING</a>
+            <a href="{{ route('home') }}">HOME</a>
+            <a href="{{ route('about') }}">ABOUT US</a>
+            <a href="{{ route('services') }}">SERVICES</a>
+            <a href="{{ route('pricing') }}">PRICING</a>
             <a href="#">CONTACT</a>
         </div>
     </nav>
+
 
     <div class="hero">
         <div class="text">
