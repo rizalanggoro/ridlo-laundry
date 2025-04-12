@@ -1,24 +1,29 @@
 {
-  "name": "almada-laundry",
-  "version": "1.0.0",
-  "description": "Sistem manajemen untuk Almada Laundry",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
-    "dev": "nodemon index.js"
-  },
-  "author": "",
-  "license": "ISC",
-  "directories": {
-    "test": "tests"
-  },
-  "keywords": [],
-  "devDependencies": {
-    "nodemon": "^3.0.0"
-  },
-  "dependencies": {
-    "bootstrap": "^5.3.3",
-    "express": "^4.21.2"
-  }
+    "name": "almada-laundry",
+    "version": "1.0.0",
+    "description": "Sistem manajemen untuk Almada Laundry",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node index.js",
+        "dev": "nodemon index.js",
+        "dev-vite": "vite",
+        "build": "vite build"
+    },
+    "author": "",
+    "license": "ISC",
+    "directories": {
+        "test": "tests"
+    },
+    "keywords": [],
+    "devDependencies": {
+        "vite": "^6.2.5",
+        "laravel-vite-plugin": "^1.2.0",
+        "nodemon": "^3.0.0"
+    },
+    "dependencies": {
+        "bootstrap": "^5.3.5",
+        "express": "^4.21.2"
+    }
 }

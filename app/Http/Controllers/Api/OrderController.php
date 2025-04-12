@@ -18,8 +18,8 @@ class OrderController extends BaseController
         $query = Order::with(['customer', 'laundry'])
             ->where('laundry_id', $request->user()->laundry_id);
 
-        $thirtyDaysAgo = date('Y-m-d', strtotime('-30 days'));
-        $query->whereDate('order_date', '>=', $thirtyDaysAgo);
+        // $thirtyDaysAgo = date('Y-m-d', strtotime('-30 days'));
+        // $query->whereDate('order_date', '>=', $thirtyDaysAgo);
 
         // Filter by status
         if ($request->has('status')) {
@@ -87,7 +87,7 @@ class OrderController extends BaseController
                 'weight' => 'required|numeric|min:0',
                 'total_price' => 'required|numeric|min:0',
                 'note' => 'nullable|string',
-                'order_date' => 'required|date_format:Y-m-d H:i:s'
+                'order_date' => 'nullable|date_format:Y-m-d H:i:s'
             ];
 
             if (!$customer) {
@@ -120,7 +120,7 @@ class OrderController extends BaseController
                 'note' => $validated['note'] ?? null,
                 'barcode' => 'ORD-' . uniqid(),
                 'status' => 'pending',
-                'order_date' => now(),
+                'order_date' => $validated['order_date'] ?? now(),
             ]);
 
             return response()->json([
