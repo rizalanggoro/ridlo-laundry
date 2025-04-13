@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\API\BaseController;
 use App\Http\Controllers\Controller;
-use Illuminate\Routing\Controller as BaseController;
 use App\Http\Resources\OrderResource;
 use App\Models\Customer;
 use App\Models\Order;
@@ -222,12 +222,21 @@ class OrderController extends BaseController
 
     private function formatPhoneNumber($phone)
     {
-        $prefixes = ['08', '628', '+628'];
+        // Hapus semua karakter non-digit
+        $phone = preg_replace('/\D/', '', $phone);
 
-        foreach ($prefixes as $prefix) {
-            if (str_starts_with($phone, $prefix)) {
-                return substr($phone, strlen($prefix) - 1);
-            }
+        // Jika diawali dengan +62 atau 62, hapus kode negara
+        if (str_starts_with($phone, '+62')) {
+            $phone = substr($phone, 3); // Hapus +62
+        } elseif (str_starts_with($phone, '62')) {
+            $phone = substr($phone, 2); // Hapus 62
+        } elseif (str_starts_with($phone, '0')) {
+            $phone = substr($phone, 1); // Hapus 0
+        }
+
+        // minimum 9 digit
+        if (strlen($phone) < 9) {
+            throw new \Exception('Invalid phone number length');
         }
 
         return $phone;
@@ -334,6 +343,54 @@ class OrderController extends BaseController
                 'message' => 'Error retrieving statistics',
                 'error' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    public function trackOrders(Request $request, $phone)
+    {
+        try {
+            $request->merge(['phone' => $phone]);
+            $request->validate([
+                'phone' => 'required|string|max:15',
+            ]);
+
+            $normalizedPhone = $this->formatPhoneNumber($phone);
+
+            $customer = Customer::where('phone', $normalizedPhone)->first();
+
+            if (!$customer) {
+                return $this->sendError('Customer not found', [], 404);
+            }
+
+            // Ambil order untuk customer, urutkan dari terbaru
+            $query = Order::with(['customer', 'laundry'])
+                ->where('customer_id', $customer->id)
+                ->orderBy('order_date', 'desc')
+                ->orderBy('id', 'desc');
+
+            // Pagination
+            $perPage = $request->get('per_page', 10);
+            $orders = $query->paginate($perPage);
+
+            if ($orders->isEmpty()) {
+                return $this->sendResponse([], 'No orders found for this customer');
+            }
+
+            return $this->sendResponse(
+                [
+                    'orders' => OrderResource::collection($orders),
+                    'meta' => [
+                        'total_orders' => $orders->total(),
+                        'total_pages' => $orders->lastPage(),
+                        'current_page' => $orders->currentPage(),
+                        'per_page' => $orders->perPage(),
+                    ],
+                ],
+                'Orders retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            Log::error('Track orders error: ' . $e->getMessage(), ['phone' => $phone]);
+            return $this->sendError('Error retrieving orders', ['error' => $e->getMessage()], 400);
         }
     }
 }

@@ -22,6 +22,7 @@ Route::middleware(['api', 'auth:sanctum'])->group(function () {
 
 Route::prefix('customers')->group(function () {
     Route::get('/check/{phone}', [OrderController::class, 'checkCustomer']);
+    Route::get('/{phone}/orders', [OrderController::class, 'trackOrders']);
 });
 
 Route::controller(AuthController::class)->group(function () {
