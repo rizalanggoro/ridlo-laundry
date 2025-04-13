@@ -10,9 +10,11 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends BaseController
 {
+    // list order
     public function index(Request $request)
     {
         $query = Order::with(['customer', 'laundry'])
@@ -229,5 +231,109 @@ class OrderController extends BaseController
         }
 
         return $phone;
+    }
+
+    public function statistics(Request $request)
+    {
+        try {
+            $request->validate([
+                'period' => 'required|in:daily,monthly',
+                'months' => 'sometimes|integer|min:1|max:12', // Opsional untuk periode bulanan
+            ]);
+
+            $laundryId = $request->user()->laundry_id;
+            $period = $request->period;
+            $months = $request->input('months', 6); // Default 6 bulan jika tidak disediakan
+
+            Log::info('Statistics request', [
+                'laundry_id' => $laundryId,
+                'period' => $period,
+                'months' => $months,
+            ]);
+
+            if ($period === 'daily') {
+                // Statistik harian (30 hari terakhir)
+                $startDate = Carbon::today()->subDays(30);
+                $endDate = Carbon::today();
+
+                $data = Order::selectRaw('DATE(order_date) as date, COUNT(*) as count, SUM(total_price) as revenue')
+                    ->where('laundry_id', $laundryId)
+                    ->whereBetween('order_date', [$startDate, $endDate])
+                    ->groupBy('date')
+                    ->orderBy('date', 'asc')
+                    ->get()
+                    ->map(function ($item) {
+                        return [
+                            'date' => $item->date,
+                            'count' => (int) $item->count,
+                            'revenue' => (float) $item->revenue,
+                        ];
+                    });
+
+                // Isi tanggal kosong dengan 0 untuk konsistensi chart
+                $result = [];
+                $currentDate = $startDate->copy();
+                while ($currentDate <= $endDate) {
+                    $dateStr = $currentDate->format('Y-m-d');
+                    $found = $data->firstWhere('date', $dateStr);
+                    $result[] = [
+                        'date' => $dateStr,
+                        'count' => $found ? $found['count'] : 0,
+                        'revenue' => $found ? $found['revenue'] : 0.0,
+                    ];
+                    $currentDate->addDay();
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $result,
+                    'message' => 'Daily statistics retrieved successfully',
+                ], 200);
+            } else {
+                // Statistik bulanan
+                $startDate = Carbon::today()->subMonths($months)->startOfMonth();
+                $endDate = Carbon::today()->endOfMonth();
+
+                $data = Order::selectRaw('DATE_FORMAT(order_date, "%Y-%m") as month, COUNT(*) as count, SUM(total_price) as revenue')
+                    ->where('laundry_id', $laundryId)
+                    ->whereBetween('order_date', [$startDate, $endDate])
+                    ->groupBy('month')
+                    ->orderBy('month', 'asc')
+                    ->get()
+                    ->map(function ($item) {
+                        return [
+                            'month' => $item->month,
+                            'count' => (int) $item->count,
+                            'revenue' => (float) $item->revenue,
+                        ];
+                    });
+                // Isi bulan kosong dengan 0 untuk konsistensi chart
+                $result = [];
+                $currentMonth = $startDate->copy();
+                while ($currentMonth <= $endDate) {
+                    $monthStr = $currentMonth->format('Y-m');
+                    $found = $data->firstWhere('month', $monthStr);
+                    $result[] = [
+                        'month' => $monthStr,
+                        'count' => $found ? $found['count'] : 0,
+                        'revenue' => $found ? $found['revenue'] : 0.0,
+                    ];
+                    $currentMonth->addMonth();
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $result,
+                    'message' => 'Monthly statistics retrieved successfully',
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            Log::error('Statistics error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error retrieving statistics',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

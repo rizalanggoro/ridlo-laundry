@@ -103,6 +103,7 @@ class DatabaseSeeder extends Seeder
                 'weight' => 3.5,
                 'total_price' => 35000,
                 'note' => 'Tolong disetrika rapi',
+                'order_date' => now(),
             ],
             [
                 'id' => Str::uuid(),
@@ -114,6 +115,7 @@ class DatabaseSeeder extends Seeder
                 'weight' => 2.0,
                 'total_price' => 40000,
                 'note' => 'Pakaian putih dipisah',
+                'order_date' => now(),
             ],
         ];
 

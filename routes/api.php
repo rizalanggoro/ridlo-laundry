@@ -12,10 +12,11 @@ Route::middleware(['api', 'auth:sanctum'])->group(function () {
     Route::prefix('orders')->group(function () {
         Route::get('/', [OrderController::class, 'index']);
         Route::post('/', [OrderController::class, 'store']);
+        Route::get('/statistics', [OrderController::class, 'statistics']);
+        Route::get('/barcode/{barcode}', [OrderController::class, 'getByBarcode']);
         Route::get('/{order}', [OrderController::class, 'show']);
         Route::delete('/{order}', [OrderController::class, 'destroy']);
         Route::patch('/{order}/status', [OrderController::class, 'updateStatus']);
-        Route::get('/barcode/{barcode}', [OrderController::class, 'getByBarcode']);
     });
 });
 
