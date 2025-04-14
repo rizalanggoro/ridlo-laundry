@@ -9,5 +9,10 @@ class Laundry extends Model
 {
     use HasUuids;
     public $incrementing = false;
-    protected $fillable = ['name', 'address', 'phone'];
+    protected $fillable = [
+      'name',
+     'address',
+      'phone'
+    ];
+
 }
