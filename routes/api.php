@@ -19,6 +19,15 @@ Route::middleware(['api', 'auth:sanctum'])->group(function () {
         Route::patch('/{order}/status', [OrderController::class, 'updateStatus']);
     });
 });
+Route::middleware(['api', 'auth:sanctum'])->group(function () {
+    Route::prefix('laundries')->group(function () {
+        Route::get('/', [OrderController::class, 'indexLaundries']);
+        Route::post('/', [OrderController::class, 'storeLaundry']);
+        Route::get('/{laundry}', [OrderController::class, 'showLaundry']);
+        Route::delete('/{laundry}', [OrderController::class, 'destroyLaundry']);
+    });
+});
+
 
 Route::prefix('customers')->group(function () {
     Route::get('/check/{phone}', [OrderController::class, 'checkCustomer']);
