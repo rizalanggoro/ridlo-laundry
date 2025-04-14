@@ -5,9 +5,9 @@ use App\Http\Controllers\Api\OrderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
+//     return $request->user();
+// });
 Route::middleware(['api', 'auth:sanctum'])->group(function () {
     Route::prefix('orders')->group(function () {
         Route::get('/', [OrderController::class, 'index']);
@@ -30,4 +30,6 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'login')->name('login');
     Route::middleware('auth:sanctum')->post('logout', 'logout')->name('logout');
     Route::middleware('auth:sanctum')->put('updateProfile', 'updateProfile')->name('updateProfile');
+    // get users
+    Route::middleware('auth:sanctum')->get('user', 'getUser')->name('user');
 });

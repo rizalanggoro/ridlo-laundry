@@ -82,6 +82,33 @@ class AuthController extends BaseController
         }
     }
 
+    public function getUser(Request $request)
+    {
+        try {
+            $user = $request->user()->load('laundry');
+
+            // Format respons
+            $response = [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'laundry' => $user->laundry ? [
+                    'id' => $user->laundry->id,
+                    'name' => $user->laundry->name,
+                ] : null,
+                'email_verified_at' => $user->email_verified_at?->toISOString(),
+                'created_at' => $user->created_at->toISOString(),
+                'updated_at' => $user->updated_at->toISOString(),
+            ];
+
+            return $this->sendResponse($response, 'User retrieved successfully');
+        } catch (\Exception $e) {
+            \Log::error('Get user error: ' . $e->getMessage());
+            return $this->sendError('Error retrieving user', ['error' => $e->getMessage()], 500);
+        }
+    }
+
     public function updateProfile(Request $request)
     {
         try {
