@@ -61,12 +61,22 @@
             <div class="v349_329">
                 <div class="name"></div>
             </div>
-            <div class="v349_331">
+            <a href="{{ route('login') }}">
+                <div class="v349_331">
+                    <div class="v349_332"></div><span class="v349_333">LOGIN</span>
+                </div>
+            </a>
+            <a href="{{ route('register') }}">
+                <div class="v349_334">
+                    <div class="v349_335"></div><span class="v349_336">REGISTER</span>
+                </div>
+            </a>
+            <!-- <div class="v349_331">
                 <div class="v349_332"></div><span class="v349_333">LOGIN</span>
             </div>
             <div class="v349_334">
                 <div class="v349_335"></div><span class="v349_336">REGISTER</span>
-            </div>
+            </div> -->
         </div>
     </div>
 </body>
