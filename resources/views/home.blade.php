@@ -1480,7 +1480,7 @@
     .v292_688 {
         width: 16px;
         height: 16px;
-        background: url("/storage/v292_688.png");
+        background: url("/storage/v292_659.png");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: cover;
