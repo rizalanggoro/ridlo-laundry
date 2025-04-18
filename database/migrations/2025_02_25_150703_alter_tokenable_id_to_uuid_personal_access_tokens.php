@@ -12,9 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('personal_access_tokens', function (Blueprint $table) {
-           $table->dropColumn(("tokenable_id"));
+            $table->dropMorphs('tokenable');
 
-           $table->uuid('tokenable_id')->after('id');
+            $table->uuid('tokenable_id')->after('id');
+            $table->string('tokenable_type')->after('tokenable_id');
         });
     }
 
@@ -25,7 +26,7 @@ return new class extends Migration
     {
         Schema::table('personal_access_tokens', function (Blueprint $table) {
             //
-            $table->dropColumn(("tokenable_id"));
+            $table->dropColumn(['tokenable_id', 'tokenable_type']);
 
             $table->morphs('tokenable');
         });
