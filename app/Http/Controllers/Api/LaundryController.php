@@ -20,10 +20,6 @@ class LaundryController extends BaseController
     {
         $query = Laundry::query();
 
-        //Filter by date range
-        if ($request->has('start_date') && $request->has('end_date')) {
-            $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
-        }
 
         // Search by name or phone
         if ($request->has('search')) {
@@ -38,19 +34,11 @@ class LaundryController extends BaseController
         $sortDirection = $request->get('sort_direction', 'desc');
         $query->orderBy($sortField, $sortDirection);
 
-        // Pagination
-        $perPage = $request->get('per_page', 5);
-        $laundries = $query->paginate($perPage);
+        $pages = $request->get();
 
         return response()->json([
             'success' => true,
             'data' => LaundryResource::collection($laundries),
-            'meta' => [
-                'current_page' => $laundries->currentPage(),
-                'last_page' => $laundries->lastPage(),
-                'per_page' => $laundries->perPage(),
-                'total' => $laundries->total(),
-            ],
         ], 200);
     }
 
