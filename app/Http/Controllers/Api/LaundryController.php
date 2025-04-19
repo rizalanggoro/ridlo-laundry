@@ -34,15 +34,16 @@ class LaundryController extends BaseController
         $sortDirection = $request->get('sort_direction', 'desc');
         $query->orderBy($sortField, $sortDirection);
 
-        $laundries = $request->get();
-
+        
+        $pages  =  $request->get();
+        $laundries = $query->paginate($pages); 
+        
         return response()->json([
             'success' => true,
             'data' => LaundryResource::collection($laundries),
         ], 200);
     }
-
-      
+ 
     
     public function store(Request $request)
     {
