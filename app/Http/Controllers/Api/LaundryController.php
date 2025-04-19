@@ -34,7 +34,7 @@ class LaundryController extends BaseController
         $sortDirection = $request->get('sort_direction', 'desc');
         $query->orderBy($sortField, $sortDirection);
 
-        $pages = $request->get();
+        $laundries = $request->get();
 
         return response()->json([
             'success' => true,
