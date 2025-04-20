@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Customer;
 use App\Models\Laundry;
 use App\Models\Order;
+use App\Models\Service;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -36,6 +37,40 @@ class DatabaseSeeder extends Seeder
             Laundry::create($laundry);
         }
 
+        // Seeder untuk services
+        $services = [
+            // Services untuk Laundry Bersih Jaya
+            [
+                'id' => Str::uuid(),
+                'laundry_id' => $laundries[0]['id'],
+                'name' => 'Kiloan',
+                'description' => 'Cuci dan setrika per kilogram, selesai dalam 2 hari',
+            ],
+            [
+                'id' => Str::uuid(),
+                'laundry_id' => $laundries[0]['id'],
+                'name' => 'Express',
+                'description' => 'Cuci dan setrika cepat, selesai dalam 24 jam',
+            ],
+            // Services untuk Laundry Sejahtera
+            [
+                'id' => Str::uuid(),
+                'laundry_id' => $laundries[1]['id'],
+                'name' => 'Satuan',
+                'description' => 'Cuci dan setrika per potong pakaian',
+            ],
+            [
+                'id' => Str::uuid(),
+                'laundry_id' => $laundries[1]['id'],
+                'name' => 'Regular',
+                'description' => 'Cuci standar, selesai dalam 3 hari',
+            ],
+        ];
+
+        foreach ($services as $service) {
+            Service::create($service);
+        }
+
         // Seeder untuk users
         $users = [
             [
@@ -58,6 +93,14 @@ class DatabaseSeeder extends Seeder
                 'id' => Str::uuid(),
                 'name' => 'Ahmad Wijaya',
                 'email' => 'ahmad@example.com',
+                'password' => Hash::make('password123'),
+                'role' => 'staff',
+                'laundry_id' => $laundries[1]['id'],
+            ],
+            [
+                'id' => Str::uuid(),
+                'name' => 'Ridlo',
+                'email' => 'ridlo@gmail.com',
                 'password' => Hash::make('password123'),
                 'role' => 'owner',
                 'laundry_id' => $laundries[1]['id'],
@@ -97,11 +140,11 @@ class DatabaseSeeder extends Seeder
                 'id' => Str::uuid(),
                 'customer_id' => $customers[0]['id'],
                 'laundry_id' => $laundries[0]['id'],
+                'service_id' => $services[0]['id'], // Kiloan dari Laundry Bersih Jaya
                 'status' => 'washed',
-                'type' => 'kiloan',
                 'barcode' => 'ORD-' . Str::random(8),
                 'weight' => 3.5,
-                'total_price' => 35000,
+                'total_price' => 35000, // 3.5 kg * 10000
                 'note' => 'Tolong disetrika rapi',
                 'order_date' => now(),
             ],
@@ -109,11 +152,11 @@ class DatabaseSeeder extends Seeder
                 'id' => Str::uuid(),
                 'customer_id' => $customers[1]['id'],
                 'laundry_id' => $laundries[1]['id'],
+                'service_id' => $services[2]['id'], // Satuan dari Laundry Sejahtera
                 'status' => 'dried',
-                'type' => 'express',
                 'barcode' => 'ORD-' . Str::random(8),
                 'weight' => 2.0,
-                'total_price' => 40000,
+                'total_price' => 10000, // 2 item * 5000
                 'note' => 'Pakaian putih dipisah',
                 'order_date' => now(),
             ],

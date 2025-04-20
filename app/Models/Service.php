@@ -5,34 +5,27 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Order extends Model
+class Service extends Model
 {
     use HasUuids;
-    public $incrementing = false;
-    protected $fillable = [
-        'customer_id',
-        'laundry_id',
-        'service_id',
-        'status',
-        'barcode',
-        'weight',
-        'total_price',
-        'note',
-        'order_date',
-    ];
 
-    public function customer(): BelongsTo
-    {
-        return $this->belongsTo(Customer::class);
-    }
+    public $incrementing = false;
+
+    protected $fillable = [
+        'laundry_id',
+        'name',
+        'description',
+    ];
 
     public function laundry(): BelongsTo
     {
         return $this->belongsTo(Laundry::class);
     }
-    public function service(): BelongsTo
+
+    public function orders(): HasMany
     {
-        return $this->belongsTo(Service::class);
+        return $this->hasMany(Order::class);
     }
 }

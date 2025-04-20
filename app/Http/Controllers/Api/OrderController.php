@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -29,9 +30,9 @@ class OrderController extends BaseController
             $query->whereIn('status', $statuses);
         }
 
-        // Filter by type
-        if ($request->has('type')) {
-            $query->where('type', $request->type);
+        // Filter by service_id (opsional)
+        if ($request->has('service_id')) {
+            $query->where('service_id', $request->service_id);
         }
 
         // Filter by date range
@@ -85,7 +86,7 @@ class OrderController extends BaseController
             $rules = [
                 'phone' => 'required',
                 'laundry_id' => 'required|exists:laundries,id',
-                'type' => 'required|in:regular,express',
+                'service_id' => 'required|exists:services,id',
                 'weight' => 'required|numeric|min:0',
                 'total_price' => 'required|numeric|min:0',
                 'note' => 'nullable|string',
@@ -105,6 +106,15 @@ class OrderController extends BaseController
                     'message' => 'Unauthorized: Invalid laundry ID'
                 ], 403);
             }
+            $service = Service::where('id', $validated['service_id'])
+                ->where('laundry_id', $validated['laundry_id'])
+                ->first();
+            if (!$service) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid service for the selected laundry'
+                ], 422);
+            }
 
             if (!$customer) {
                 $customer = Customer::create([
@@ -116,7 +126,7 @@ class OrderController extends BaseController
             $order = Order::create([
                 'customer_id' => $customer->id,
                 'laundry_id' => $validated['laundry_id'],
-                'type' => $validated['type'],
+                'service_id' => $validated['service_id'],
                 'weight' => $validated['weight'],
                 'total_price' => $validated['total_price'],
                 'note' => $validated['note'] ?? null,
@@ -128,7 +138,7 @@ class OrderController extends BaseController
             return response()->json([
                 'success' => true,
                 'message' => 'Order created successfully',
-                'data' => new OrderResource($order->load(['customer', 'laundry']))
+                'data' => new OrderResource($order->load(['customer', 'laundry', 'service']))
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
@@ -143,7 +153,7 @@ class OrderController extends BaseController
     {
         return response()->json([
             'success' => true,
-            'data' => new OrderResource($order->load(['customer', 'laundry']))
+            'data' => new OrderResource($order->load(['customer', 'laundry', 'service']))
         ], 200);
     }
 
@@ -160,7 +170,7 @@ class OrderController extends BaseController
         return response()->json([
             'success' => true,
             'message' => 'Order status updated successfully',
-            'data' => new OrderResource($order->load(['customer', 'laundry']))
+            'data' => new OrderResource($order->load(['customer', 'laundry', 'service']))
         ], 200);
     }
 
