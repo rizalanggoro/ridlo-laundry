@@ -121,15 +121,18 @@ class AuthController extends BaseController
                 'name' => 'sometimes|required',
                 'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
                 'password' => 'sometimes|required',
-                'role' => 'sometimes|required|string|in:owner,staff',
-                'laundry_id' => 'sometimes|required|exists:laundries,id',
+                // 'role' => 'sometimes|required|string|in:owner,staff',
+                // 'laundry_id' => 'sometimes|required|exists:laundries,id',
             ]);
 
             if ($validator->fails()) {
                 return $this->sendError('Validation Error', $validator->errors());
             }
 
-            if (!$request->hasAny(['name', 'email', 'password', 'role', 'laundry_id'])) {
+            // if (!$request->hasAny(['name', 'email', 'password', 'role', 'laundry_id'])) {
+            //     return $this->sendError('No changes detected', []);
+            // }
+            if (!$request->hasAny(['name', 'email', 'password'])) {
                 return $this->sendError('No changes detected', []);
             }
 
@@ -145,13 +148,13 @@ class AuthController extends BaseController
                 $user->password = Hash::make($request->password);
             }
 
-            if ($request->has('role')) {
-                $user->role = $request->role;
-            }
+            // if ($request->has('role')) {
+            //     $user->role = $request->role;
+            // }
 
-            if ($request->has('laundry_id')) {
-                $user->laundry_id = $request->laundry_id;
-            }
+            // if ($request->has('laundry_id')) {
+            //     $user->laundry_id = $request->laundry_id;
+            // }
 
             if (!$user->isDirty()) {
                 return $this->sendError('No changes detected', []);

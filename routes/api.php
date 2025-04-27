@@ -21,12 +21,6 @@ Route::middleware(['api', 'auth:sanctum'])->group(function () {
         Route::patch('/{order}/status', [OrderController::class, 'updateStatus']);
     });
     Route::prefix('laundries')->group(function () {
-        // Route::get('/', [LaundryController::class, 'indexLaundries']);
-        // Route::post('/', [LaundryController::class, 'storeLaundry']);
-        // Route::get('/{laundry}', [LaundryController::class, 'showLaundry']);
-        // Route::delete('/{laundry}', [LaundryController::class, 'destroyLaundry']);
-
-        // rute untuk service
         Route::get('/{laundry}/services', [ServiceController::class, 'index']);
         Route::post('/{laundry}/services', [ServiceController::class, 'store']);
     });
@@ -35,6 +29,7 @@ Route::middleware(['api', 'auth:sanctum'])->group(function () {
 Route::middleware(['api'])->group(function () {
     Route::prefix('laundries')->group(function () {
         Route::get('/', [LaundryController::class, 'index']);
+        Route::post('/', [LaundryController::class, 'store']);
         Route::get('/{laundry}', [LaundryController::class, 'show']);
     });
 });

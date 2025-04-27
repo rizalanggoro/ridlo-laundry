@@ -18,11 +18,8 @@ class OrderController extends BaseController
     // list order
     public function index(Request $request)
     {
-        $query = Order::with(['customer', 'laundry'])
+        $query = Order::with(['customer', 'laundry', 'service'])
             ->where('laundry_id', $request->user()->laundry_id);
-
-        // $thirtyDaysAgo = date('Y-m-d', strtotime('-30 days'));
-        // $query->whereDate('order_date', '>=', $thirtyDaysAgo);
 
         // Filter by status
         if ($request->has('status')) {
@@ -30,7 +27,7 @@ class OrderController extends BaseController
             $query->whereIn('status', $statuses);
         }
 
-        // Filter by service_id (opsional)
+        // Filter by service_id
         if ($request->has('service_id')) {
             $query->where('service_id', $request->service_id);
         }

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController;
 use App\Models\Laundry;
 
-class ServiceController extends Controller
+class ServiceController extends BaseController
 {
     /**
      * Display a listing of services for a specific laundry.
