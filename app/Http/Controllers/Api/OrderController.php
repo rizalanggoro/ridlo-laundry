@@ -369,32 +369,37 @@ class OrderController extends BaseController
                 return $this->sendError('Customer not found', [], 404);
             }
 
-            // Ambil order untuk customer, urutkan dari terbaru
-            $query = Order::with(['customer', 'laundry'])
+            $query = Order::with(['customer', 'laundry', 'service']) // jangan lupa service juga!
                 ->where('customer_id', $customer->id)
                 ->orderBy('order_date', 'desc')
                 ->orderBy('id', 'desc');
 
-            // Pagination
             $perPage = $request->get('per_page', 10);
             $orders = $query->paginate($perPage);
 
             if ($orders->isEmpty()) {
-                return $this->sendResponse([], 'No orders found for this customer');
+                return response()->json([
+                    'success' => true,
+                    'data' => [],
+                    'meta' => [
+                        'total_orders' => 0,
+                        'total_pages' => 0,
+                        'current_page' => 1,
+                        'per_page' => (int)$perPage,
+                    ],
+                ]);
             }
 
-            return $this->sendResponse(
-                [
-                    'orders' => OrderResource::collection($orders),
-                    'meta' => [
-                        'total_orders' => $orders->total(),
-                        'total_pages' => $orders->lastPage(),
-                        'current_page' => $orders->currentPage(),
-                        'per_page' => $orders->perPage(),
-                    ],
+            return response()->json([
+                'success' => true,
+                'data' => OrderResource::collection($orders->items()),
+                'meta' => [
+                    'total_orders' => $orders->total(),
+                    'total_pages' => $orders->lastPage(),
+                    'current_page' => $orders->currentPage(),
+                    'per_page' => $orders->perPage(),
                 ],
-                'Orders retrieved successfully'
-            );
+            ]);
         } catch (\Exception $e) {
             Log::error('Track orders error: ' . $e->getMessage(), ['phone' => $phone]);
             return $this->sendError('Error retrieving orders', ['error' => $e->getMessage()], 400);
