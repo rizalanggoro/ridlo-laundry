@@ -13,43 +13,6 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends BaseController
 {
-    /**
-     * @OA\Post(
-     *     path="/api/register",
-     *     summary="Register a new user",
-     *     tags={"Authentication"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"name","email","password","c_password","role","laundry_id"},
-     *             @OA\Property(property="name", type="string", example="Ridlo AU"),
-     *             @OA\Property(property="email", type="string", format="email", example="ridlo@gmail.com"),
-     *             @OA\Property(property="password", type="string", format="password", example="password123"),
-     *             @OA\Property(property="c_password", type="string", format="password", example="password123"),
-     *             @OA\Property(property="role", type="string", enum={"owner","staff"}, example="owner"),
-     *             @OA\Property(property="laundry_id", type="integer", example=1)
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="User registered successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="token", type="string", example="1|abcdef123456"),
-     *             @OA\Property(property="name", type="string", example="Ridlo AU"),
-     *             @OA\Property(property="role", type="string", example="owner"),
-     *             @OA\Property(property="laundry_id", type="integer", example=1)
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Validation Error"),
-     *             @OA\Property(property="errors", type="object")
-     *         )
-     *     )
-     * )
-     */
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
