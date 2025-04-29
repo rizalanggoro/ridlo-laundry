@@ -192,21 +192,32 @@ class OrderController extends BaseController
 
     public function checkCustomer(Request $request, $phone)
     {
-        $customer = Customer::where('phone', $phone)->first();
+        try {
+            $formattedPhone = $this->formatPhoneNumber($phone);
+            $customer = Customer::where('phone', $formattedPhone)->first();
 
-        if (!$customer) {
+            if (!$customer) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Customer not found',
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'id' => (string) $customer->id,
+                    'name' => $customer->name,
+                    'phone' => $customer->phone
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Check customer error: ' . $e->getMessage(), ['phone' => $phone]);
             return response()->json([
                 'success' => false,
-                'message' => 'Customer not found',
-            ], 404);
+                'message' => 'Error processing request: ' . $e->getMessage(),
+            ], 400);
         }
-
-        $orders = Order::where('customer_id', $customer->id)->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => OrderResource::collection($orders),
-        ], 200);
     }
 
     public function destroy(Order $order)

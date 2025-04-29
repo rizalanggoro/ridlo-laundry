@@ -19,6 +19,7 @@ class OrderResource extends JsonResource
             'laundry' => [
                 'id' => (string) $this->laundry->id,
                 'name' => $this->laundry->name,
+                'phone' => $this->laundry->phone,
             ],
             'service' => [
                 'id' => (string) $this->service->id,
