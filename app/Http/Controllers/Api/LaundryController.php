@@ -78,7 +78,7 @@ class LaundryController extends BaseController
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create order',
+                'message' => 'Failed to create laundry',
                 'error' => $e->getMessage()
             ], 500);
         }
