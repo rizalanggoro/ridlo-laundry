@@ -10,19 +10,34 @@ use Illuminate\Support\Facades\Route;
 // Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 //     return $request->user();
 // });
-Route::middleware(['api', 'auth:sanctum'])->group(function () {
-    Route::prefix('orders')->group(function () {
-        Route::get('/', [OrderController::class, 'index']);
-        Route::post('/', [OrderController::class, 'store']);
-        Route::get('/statistics', [OrderController::class, 'statistics']);
-        Route::get('/barcode/{barcode}', [OrderController::class, 'getByBarcode']);
-        Route::get('/{order}', [OrderController::class, 'show']);
-        Route::delete('/{order}', [OrderController::class, 'destroy']);
-        Route::patch('/{order}/status', [OrderController::class, 'updateStatus']);
+Route::middleware(['api', 'auth:sanctum', 'role:owner'])->group(function () {
+    Route::prefix('admin')->group(function () {
+        Route::get('/dashboard', [OrderController::class, 'adminDashboard']);
+        Route::prefix('orders')->group(function () {
+            Route::get('/', [OrderController::class, 'index']);
+            Route::post('/', [OrderController::class, 'store']);
+            Route::get('/statistics', [OrderController::class, 'statistics']);
+            Route::get('/barcode/{barcode}', [OrderController::class, 'getByBarcode']);
+            Route::get('/{order}', [OrderController::class, 'show']);
+            Route::delete('/{order}', [OrderController::class, 'destroy']);
+            Route::patch('/{order}/status', [OrderController::class, 'updateStatus']);
+        });
+        Route::prefix('laundries')->group(function () {
+            Route::get('/{laundry}/services', [ServiceController::class, 'index']);
+            Route::post('/{laundry}/services', [ServiceController::class, 'store']);
+        });
     });
-    Route::prefix('laundries')->group(function () {
-        Route::get('/{laundry}/services', [ServiceController::class, 'index']);
-        Route::post('/{laundry}/services', [ServiceController::class, 'store']);
+});
+
+Route::middleware(['api', 'auth:sanctum', 'role:staff'])->group(function () {
+    Route::prefix('staff')->group(function () {
+        Route::get('/home', [OrderController::class, 'staffHome']);
+        Route::prefix('orders')->group(function () {
+            Route::get('/', [OrderController::class, 'staffOrders']);
+            Route::post('/', [OrderController::class, 'store']);
+            Route::get('/{order}', [OrderController::class, 'show']);
+            Route::patch('/{order}/status', [OrderController::class, 'updateStatus']);
+        });
     });
 });
 
