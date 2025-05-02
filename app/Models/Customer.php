@@ -9,5 +9,5 @@ class Customer extends Model
 {
     use HasUuids;
     public $incrementing = false;
-    protected $fillable = ['name', 'phone'];
+    protected $fillable = ['name', 'phone', 'username'];
 }

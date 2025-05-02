@@ -117,16 +117,19 @@ class DatabaseSeeder extends Seeder
                 'id' => Str::uuid(),
                 'name' => 'Siti Rahayu',
                 'phone' => '81122334455',
+                'username' => 'sitirahayu',
             ],
             [
                 'id' => Str::uuid(),
                 'name' => 'Rudi Hermawan',
                 'phone' => '82233445566',
+                'username' => 'rudihermawan',
             ],
             [
                 'id' => Str::uuid(),
                 'name' => 'Nina Kusuma',
                 'phone' => '83344556677',
+                'username' => 'ninakusuma',
             ],
         ];
 

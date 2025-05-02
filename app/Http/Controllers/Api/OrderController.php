@@ -69,43 +69,39 @@ class OrderController extends BaseController
     public function store(Request $request)
     {
         try {
-            $phone = $this->formatPhoneNumber($request->phone);
-
-            if (!str_starts_with($phone, '8')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid phone number format'
-                ], 422);
-            }
-
-            $customer = Customer::where('phone', $phone)->first();
-
             $rules = [
-                'phone' => 'required',
+                'name' => 'required|string',
                 'laundry_id' => 'required|exists:laundries,id',
                 'service_id' => 'required|exists:services,id',
                 'weight' => 'required|numeric|min:0',
                 'total_price' => 'required|numeric|min:0',
                 'note' => 'nullable|string',
-                'order_date' => 'nullable|date_format:Y-m-d H:i:s'
+                'order_date' => 'nullable|date_format:Y-m-d H:i:s',
+                'phone' => 'nullable|string|max:15',
+                'username' => 'nullable|string|max:50|unique:customers,username',
             ];
+            $request->validate(array_merge($rules, [
+                'phone' => 'required_without:username',
+                'username' => 'required_without:phone',
+            ]));
 
-            if (!$customer) {
-                $rules['name'] = 'required|string';
-            }
+            $phone = $request->phone ? $this->formatPhoneNumber($request->phone) : null;
 
-            $validated = $request->validate($rules);
+            $customer = Customer::where('phone', $phone)
+                ->orWhere('username', $request->username)
+                ->first();
 
-            // Validasi bahwa laundry_id sesuai dengan pengguna yang login
-            if ($validated['laundry_id'] !== $request->user()->laundry_id) {
+            if ($request->laundry_id !== $request->user()->laundry_id) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Unauthorized: Invalid laundry ID'
                 ], 403);
             }
-            $service = Service::where('id', $validated['service_id'])
-                ->where('laundry_id', $validated['laundry_id'])
+
+            $service = Service::where('id', $request->service_id)
+                ->where('laundry_id', $request->laundry_id)
                 ->first();
+
             if (!$service) {
                 return response()->json([
                     'success' => false,
@@ -115,21 +111,21 @@ class OrderController extends BaseController
 
             if (!$customer) {
                 $customer = Customer::create([
-                    'name' => $validated['name'],
-                    'phone' => $phone
+                    'name' => $request->name,
+                    'phone' => $phone,
+                    'username' => $request->username,
                 ]);
             }
-
             $order = Order::create([
                 'customer_id' => $customer->id,
-                'laundry_id' => $validated['laundry_id'],
-                'service_id' => $validated['service_id'],
-                'weight' => $validated['weight'],
-                'total_price' => $validated['total_price'],
-                'note' => $validated['note'] ?? null,
+                'laundry_id' => $request->laundry_id,
+                'service_id' => $request->service_id,
+                'weight' => $request->weight,
+                'total_price' => $request->total_price,
+                'note' => $request->note ?? null,
                 'barcode' => 'ORD-' . uniqid(),
                 'status' => 'pending',
-                'order_date' => $validated['order_date'] ?? now(),
+                'order_date' => $request->order_date ?? now(),
             ]);
 
             return response()->json([
@@ -190,11 +186,18 @@ class OrderController extends BaseController
         ], 200);
     }
 
-    public function checkCustomer(Request $request, $phone)
+    public function checkCustomer(Request $request, $identifier)
     {
         try {
-            $formattedPhone = $this->formatPhoneNumber($phone);
-            $customer = Customer::where('phone', $formattedPhone)->first();
+            $customer = null;
+
+            if (preg_match('/^[0-9+]/', $identifier)) {
+                $formattedPhone = $this->formatPhoneNumber($identifier);
+                $customer = Customer::where('phone', $formattedPhone)->first();
+            } else {
+                // Jika bukan nomor telepon, anggap sebagai username
+                $customer = Customer::where('username', $identifier)->first();
+            }
 
             if (!$customer) {
                 return response()->json([
@@ -208,11 +211,12 @@ class OrderController extends BaseController
                 'data' => [
                     'id' => (string) $customer->id,
                     'name' => $customer->name,
-                    'phone' => $customer->phone
+                    'phone' => $customer->phone,
+                    'username' => $customer->username,
                 ],
             ], 200);
         } catch (\Exception $e) {
-            Log::error('Check customer error: ' . $e->getMessage(), ['phone' => $phone]);
+            Log::error('Check customer error: ' . $e->getMessage(), ['identifier' => $identifier]);
             return response()->json([
                 'success' => false,
                 'message' => 'Error processing request: ' . $e->getMessage(),
@@ -364,23 +368,33 @@ class OrderController extends BaseController
         }
     }
 
-    public function trackOrders(Request $request, $phone)
+    public function trackOrders(Request $request, $identifier)
     {
         try {
-            $request->merge(['phone' => $phone]);
+            $request->merge(['identifier' => $identifier]);
             $request->validate([
-                'phone' => 'required|string|max:15',
+                'identifier' => 'required|string|max:50',
             ]);
 
-            $normalizedPhone = $this->formatPhoneNumber($phone);
+            $customer = null;
 
-            $customer = Customer::where('phone', $normalizedPhone)->first();
-
-            if (!$customer) {
-                return $this->sendError('Customer not found', [], 404);
+            // Coba cari berdasarkan phone
+            if (preg_match('/^[0-9+]/', $identifier)) {
+                $normalizedPhone = $this->formatPhoneNumber($identifier);
+                $customer = Customer::where('phone', $normalizedPhone)->first();
+            } else {
+                // Jika bukan nomor telepon, anggap sebagai username
+                $customer = Customer::where('username', $identifier)->first();
             }
 
-            $query = Order::with(['customer', 'laundry', 'service']) // jangan lupa service juga!
+            if (!$customer) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Customer not found',
+                ], 404);
+            }
+
+            $query = Order::with(['customer', 'laundry', 'service'])
                 ->where('customer_id', $customer->id)
                 ->orderBy('order_date', 'desc')
                 ->orderBy('id', 'desc');
@@ -412,8 +426,12 @@ class OrderController extends BaseController
                 ],
             ]);
         } catch (\Exception $e) {
-            Log::error('Track orders error: ' . $e->getMessage(), ['phone' => $phone]);
-            return $this->sendError('Error retrieving orders', ['error' => $e->getMessage()], 400);
+            Log::error('Track orders error: ' . $e->getMessage(), ['identifier' => $identifier]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error retrieving orders',
+                'error' => $e->getMessage(),
+            ], 400);
         }
     }
 }
