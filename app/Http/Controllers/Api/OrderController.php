@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class OrderController extends BaseController
@@ -448,6 +449,82 @@ class OrderController extends BaseController
                 'message' => 'Error retrieving orders',
                 'error' => $e->getMessage(),
             ], 400);
+        }
+    }
+
+    public function adminDashboard()
+    {
+        try {
+            $user = Auth::user();
+            $laundry = $user->laundry;
+
+            $statistics = [
+                'total_orders' => Order::where('laundry_id', $laundry->id)->count(),
+                'pending_orders' => Order::where('laundry_id', $laundry->id)
+                    ->where('status', 'pending')
+                    ->count(),
+                'processing_orders' => Order::where('laundry_id', $laundry->id)
+                    ->where('status', 'processing')
+                    ->count(),
+                'completed_orders' => Order::where('laundry_id', $laundry->id)
+                    ->where('status', 'completed')
+                    ->count(),
+            ];
+
+            $recent_orders = Order::where('laundry_id', $laundry->id)
+                ->with('customer')
+                ->latest()
+                ->take(5)
+                ->get();
+
+            return $this->sendResponse([
+                'statistics' => $statistics,
+                'recent_orders' => $recent_orders
+            ], 'Admin dashboard data retrieved successfully');
+        } catch (\Exception $e) {
+            return $this->sendError('Error retrieving dashboard data', ['error' => $e->getMessage()]);
+        }
+    }
+
+    public function staffHome()
+    {
+        try {
+            $user = Auth::user();
+            $laundry = $user->laundry;
+
+            $today_orders = Order::where('laundry_id', $laundry->id)
+                ->whereDate('created_at', Carbon::today())
+                ->with('customer')
+                ->get();
+
+            $pending_orders = Order::where('laundry_id', $laundry->id)
+                ->where('status', 'pending')
+                ->with('customer')
+                ->get();
+
+            return $this->sendResponse([
+                'today_orders' => $today_orders,
+                'pending_orders' => $pending_orders
+            ], 'Staff home data retrieved successfully');
+        } catch (\Exception $e) {
+            return $this->sendError('Error retrieving staff home data', ['error' => $e->getMessage()]);
+        }
+    }
+
+    public function staffOrders()
+    {
+        try {
+            $user = Auth::user();
+            $laundry = $user->laundry;
+
+            $orders = Order::where('laundry_id', $laundry->id)
+                ->with('customer')
+                ->latest()
+                ->get();
+
+            return $this->sendResponse($orders, 'Staff orders retrieved successfully');
+        } catch (\Exception $e) {
+            return $this->sendError('Error retrieving staff orders', ['error' => $e->getMessage()]);
         }
     }
 }

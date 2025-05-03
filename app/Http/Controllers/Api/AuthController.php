@@ -60,11 +60,15 @@ class AuthController extends BaseController
             $user = Auth::user();
             $tokenName = $user->name . '-' . $user->role . '-android-laundry-' . Carbon::now()->translatedFormat('d-m-Y-H-i-s');
 
+            // Determine dashboard route based on role
+            $dashboardRoute = $user->role === 'owner' ? '/admin/dashboard' : '/home';
+
             $success = [
                 'token' => $user->createToken($tokenName)->plainTextToken,
                 'name' => $user->name,
                 'role' => $user->role,
                 'laundry_id' => $user->laundry_id,
+                'dashboard_route' => $dashboardRoute,
                 'laundry_name' => $user->laundry->name,
             ];
 
