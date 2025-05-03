@@ -39,11 +39,13 @@ class OrderController extends BaseController
             $query->whereBetween('order_date', [$request->start_date, $request->end_date]);
         }
 
-        // Search by customer name or phone
+        // Search by customer name or phone or username
         if ($request->has('search')) {
-            $query->whereHas('customer', function ($q) use ($request) {
-                $q->where('name', 'like', "%{$request->search}%")
-                    ->orWhere('phone', 'like', "%{$request->search}%");
+            $searchTerm = $request->search;
+            $query->whereHas('customer', function ($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                    ->orWhere('phone', 'like', "%{$searchTerm}%")
+                    ->orWhere('username', 'like', "%{$searchTerm}%");
             });
         }
 

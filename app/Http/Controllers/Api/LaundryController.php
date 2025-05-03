@@ -49,10 +49,10 @@ class LaundryController extends BaseController
         try {
             $phone = $this->formatPhoneNumber($request->phone);
 
-            if (!str_starts_with($phone, '8')) {
+            if (!str_starts_with($phone, '0')) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Invalid phone number format. Phone number must start with 8',
+                    'message' => 'Invalid phone number format. Phone number must start with 0',
                 ], 422);
             }
 
@@ -84,29 +84,6 @@ class LaundryController extends BaseController
         }
     }
 
-
-
-    private function formatPhoneNumber($phone)
-    {
-        // Hapus semua karakter non-digit
-        $phone = preg_replace('/\D/', '', $phone);
-
-        // Jika diawali dengan +62 atau 62, hapus kode negara
-        if (str_starts_with($phone, '+62')) {
-            $phone = substr($phone, 3); // Hapus +62
-        } elseif (str_starts_with($phone, '62')) {
-            $phone = substr($phone, 2); // Hapus 62
-        } elseif (str_starts_with($phone, '0')) {
-            $phone = substr($phone, 1); // Hapus 0
-        }
-
-        // minimum 9 digit
-        if (strlen($phone) < 9) {
-            throw new \Exception('Invalid phone number length');
-        }
-
-        return $phone;
-    }
 
     public function show(Laundry $laundry)
     {

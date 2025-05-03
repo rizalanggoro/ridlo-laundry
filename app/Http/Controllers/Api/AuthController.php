@@ -16,20 +16,25 @@ class AuthController extends BaseController
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'email' => 'required|email',
-            'password' => 'required',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'regex:/^(?=.*[A-Za-z])(?=.*\d).+$/' // Minimal 1 huruf dan 1 angka
+            ],
             'c_password' => 'required|same:password',
             'role' => 'required|string|in:owner,staff',
             'laundry_id' => 'required|exists:laundries,id'
         ]);
 
         if ($validator->fails()) {
-            return $this->sendError('Validation Error', $validator->errors());
+            return $this->sendError('Validation Error', $validator->errors(), 422);
         }
 
         $input = $request->all();
-        $input['password'] = Hash::make($input["password"]);
+        $input['password'] = Hash::make($input['password']);
         $user = User::create($input);
         $tokenName = $user->name . '-' . $user->role . '-android-laundry-' . Carbon::now()->translatedFormat('d-m-Y-H-i-s');
 

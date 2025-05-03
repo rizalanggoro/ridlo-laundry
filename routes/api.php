@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 // Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 //     return $request->user();
 // });
-Route::middleware(['api', 'auth:sanctum', 'role:owner'])->group(function () {
+Route::middleware(['api', 'auth:sanctum', 'role:owner,staff'])->group(function () {
     Route::prefix('admin')->group(function () {
         Route::get('/dashboard', [OrderController::class, 'adminDashboard']);
         Route::prefix('orders')->group(function () {
