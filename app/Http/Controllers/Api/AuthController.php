@@ -37,7 +37,8 @@ class AuthController extends BaseController
             'token' => $user->createToken($tokenName)->plainTextToken,
             'name' => $user->name,
             'role' => $user->role,
-            'laundry_id' => $user->laundry_id
+            'laundry_id' => $user->laundry_id,
+            'laundry_name' => $user->laundry->name,
         ];
 
         return $this->sendResponse($success, 'User Berhasil Registrasi');
@@ -63,7 +64,8 @@ class AuthController extends BaseController
                 'token' => $user->createToken($tokenName)->plainTextToken,
                 'name' => $user->name,
                 'role' => $user->role,
-                'laundry_id' => $user->laundry_id
+                'laundry_id' => $user->laundry_id,
+                'laundry_name' => $user->laundry->name,
             ];
 
             return $this->sendResponse($success, 'User Berhasil Login');

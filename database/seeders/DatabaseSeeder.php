@@ -21,15 +21,15 @@ class DatabaseSeeder extends Seeder
         $laundries = [
             [
                 'id' => Str::uuid(),
-                'name' => 'Laundry Bersih Jaya',
-                'address' => 'Jl. Mangga No. 123, Jakarta Selatan',
-                'phone' => '81234567890',
+                'name' => 'Laundry Almada',
+                'address' => 'Jl. Surakarta No. 123, Surakarta',
+                'phone' => '081234567890',
             ],
             [
                 'id' => Str::uuid(),
                 'name' => 'Laundry Sejahtera',
                 'address' => 'Jl. Melati No. 45, Jakarta Pusat',
-                'phone' => '87654321098',
+                'phone' => '087654321098',
             ],
         ];
 
@@ -103,7 +103,7 @@ class DatabaseSeeder extends Seeder
                 'email' => 'ridlo@gmail.com',
                 'password' => Hash::make('password123'),
                 'role' => 'owner',
-                'laundry_id' => $laundries[1]['id'],
+                'laundry_id' => $laundries[0]['id'],
             ],
         ];
 
@@ -116,19 +116,19 @@ class DatabaseSeeder extends Seeder
             [
                 'id' => Str::uuid(),
                 'name' => 'Siti Rahayu',
-                'phone' => '81122334455',
+                'phone' => '081122334455',
                 'username' => 'sitirahayu',
             ],
             [
                 'id' => Str::uuid(),
                 'name' => 'Rudi Hermawan',
-                'phone' => '82233445566',
+                'phone' => '082233445566',
                 'username' => 'rudihermawan',
             ],
             [
                 'id' => Str::uuid(),
                 'name' => 'Nina Kusuma',
-                'phone' => '83344556677',
+                'phone' => '083344556677',
                 'username' => 'ninakusuma',
             ],
         ];

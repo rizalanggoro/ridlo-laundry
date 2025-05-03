@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class OrderController extends BaseController
 {
@@ -80,16 +81,19 @@ class OrderController extends BaseController
                 'phone' => 'nullable|string|max:15',
                 'username' => 'nullable|string|max:50|unique:customers,username',
             ];
-            $request->validate(array_merge($rules, [
-                'phone' => 'required_without:username',
-                'username' => 'required_without:phone',
-            ]));
+
+            // Validasi tanpa required_without
+            $request->validate($rules);
 
             $phone = $request->phone ? $this->formatPhoneNumber($request->phone) : null;
+            $username = $request->username;
 
-            $customer = Customer::where('phone', $phone)
-                ->orWhere('username', $request->username)
-                ->first();
+            $customer = null;
+            if ($phone) {
+                $customer = Customer::where('phone', $phone)->first();
+            } elseif ($username) {
+                $customer = Customer::where('username', $username)->first();
+            }
 
             if ($request->laundry_id !== $request->user()->laundry_id) {
                 return response()->json([
@@ -110,12 +114,25 @@ class OrderController extends BaseController
             }
 
             if (!$customer) {
+                // Generate username otomatis jika tidak disediakan
+                if (!$username && !$phone) {
+                    // Konversi nama menjadi username (hapus spasi, lowercase, tambahkan angka jika duplikat)
+                    $baseUsername = Str::slug($request->name, '');
+                    $username = $baseUsername;
+                    $counter = 1;
+                    while (Customer::where('username', $username)->exists()) {
+                        $username = $baseUsername . $counter;
+                        $counter++;
+                    }
+                }
+
                 $customer = Customer::create([
                     'name' => $request->name,
                     'phone' => $phone,
-                    'username' => $request->username,
+                    'username' => $username,
                 ]);
             }
+
             $order = Order::create([
                 'customer_id' => $customer->id,
                 'laundry_id' => $request->laundry_id,
@@ -224,6 +241,27 @@ class OrderController extends BaseController
         }
     }
 
+    public function searchCustomers(Request $request)
+    {
+        try {
+            $query = $request->query('name', '');
+            $customers = Customer::where('name', 'like', "%{$query}%")
+                ->take(5)
+                ->get(['id', 'name', 'phone', 'username']);
+
+            return response()->json([
+                'success' => true,
+                'data' => $customers,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Search customers error: ' . $e->getMessage(), ['query' => $request->query('name')]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error processing request: ' . $e->getMessage(),
+            ], 400);
+        }
+    }
+
     public function destroy(Order $order)
     {
         try {
@@ -240,28 +278,6 @@ class OrderController extends BaseController
                 'error' => $e->getMessage()
             ], 500);
         }
-    }
-
-    private function formatPhoneNumber($phone)
-    {
-        // Hapus semua karakter non-digit
-        $phone = preg_replace('/\D/', '', $phone);
-
-        // Jika diawali dengan +62 atau 62, hapus kode negara
-        if (str_starts_with($phone, '+62')) {
-            $phone = substr($phone, 3); // Hapus +62
-        } elseif (str_starts_with($phone, '62')) {
-            $phone = substr($phone, 2); // Hapus 62
-        } elseif (str_starts_with($phone, '0')) {
-            $phone = substr($phone, 1); // Hapus 0
-        }
-
-        // minimum 9 digit
-        if (strlen($phone) < 9) {
-            throw new \Exception('Invalid phone number length');
-        }
-
-        return $phone;
     }
 
     public function statistics(Request $request)

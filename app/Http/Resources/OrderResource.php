@@ -15,12 +15,12 @@ class OrderResource extends JsonResource
                 'id' => (string) $this->customer->id,
                 'name' => $this->customer->name,
                 'phone' => $this->customer->phone,
+                'username' => $this->customer->username,
             ],
             'laundry' => [
                 'id' => (string) $this->laundry->id,
                 'name' => $this->laundry->name,
                 'phone' => $this->laundry->phone,
-                'username' => $this->customer->username,
             ],
             'service' => [
                 'id' => (string) $this->service->id,

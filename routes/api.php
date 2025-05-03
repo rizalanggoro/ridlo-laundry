@@ -35,7 +35,8 @@ Route::middleware(['api'])->group(function () {
 });
 
 Route::prefix('customers')->group(function () {
-    Route::get('/check/{phone}', [OrderController::class, 'checkCustomer']);
+    Route::get('/check/{identifier}', [OrderController::class, 'checkCustomer']);
+    Route::get('/search', [OrderController::class, 'searchCustomers']);
     Route::get('/{phone}/orders', [OrderController::class, 'trackOrders']);
 });
 
