@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Api;
 use App\Models\Laundry;
 
 //import resource LaudryResource
-use App\Http\Controllers\API\BaseController;
 use App\Http\Resources\LaundryResource;
 
 use App\Http\Controllers\Controller;

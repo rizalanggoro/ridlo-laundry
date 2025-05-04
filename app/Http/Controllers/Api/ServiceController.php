@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\API\BaseController;
 use App\Models\Laundry;
+use Illuminate\Http\Request;
 
 class ServiceController extends BaseController
 {
