@@ -6,6 +6,8 @@
     <link href="https://fonts.googleapis.com/css?family=Knewave&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css?family=Actor&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css?family=Inter&display=swap" rel="stylesheet" />
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <link href="{{ asset('css/about.css') }}" rel="stylesheet">
     <title>About Us</title>
 </head>

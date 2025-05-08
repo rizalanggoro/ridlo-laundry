@@ -8,7 +8,8 @@
     <link href="https://fonts.googleapis.com/css?family=Jockey+One&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css?family=Inter&display=swap" rel="stylesheet" />
     <link href="{{ asset('css/home.css') }}" rel="stylesheet">
-
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Almada Laundry</title>
@@ -112,7 +113,8 @@
                 </a>
 
             </div>
-            <div class="v292_661"><span class="v292_662">OUR SERVICE</span><span class="v292_663">Lorem ipsum dolor sit
+            <div class="v292_661"><span class="v292_662">OUR SERVICE</span><span class="v292_663">Lorem ipsum dolor
+                    sit
                     amet,
                     consectetur adipiscing elit.
                 </span><span class="v292_664">LOREMIPSUM</span><span class="v292_665">Lorem ipsum dolor sit amet,
