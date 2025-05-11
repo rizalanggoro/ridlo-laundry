@@ -14,13 +14,13 @@ class OrderResource extends JsonResource
             'customer' => [
                 'id' => (string) $this->customer->id,
                 'name' => $this->customer->name,
-                'phone' => $this->customer->phone,
-                'username' => $this->customer->username,
+                'phone' => $this->customer->phone ?? '',
+                'username' => $this->customer->username ?? '',
             ],
             'laundry' => [
                 'id' => (string) $this->laundry->id,
                 'name' => $this->laundry->name,
-                'phone' => $this->laundry->phone,
+                'phone' => $this->laundry->phone ?? '',
             ],
             'service' => [
                 'id' => (string) $this->service->id,
