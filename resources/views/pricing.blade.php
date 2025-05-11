@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Pricing - Almada Laundry</title>
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -32,7 +35,7 @@
             align-items: center;
             background-color: #f5f5f5;
             padding: 15px 5%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .logo {
@@ -48,7 +51,8 @@
             font-weight: bold;
         }
 
-        .btn-login, .btn-register {
+        .btn-login,
+        .btn-register {
             margin-left: 10px;
             background-color: #fff;
             color: #003366;
@@ -59,7 +63,8 @@
         }
 
         .hero {
-            background-image: url('/path/to/laundry-banner.jpg'); /* Ganti sesuai path gambar */
+            background-image: url('/path/to/laundry-banner.jpg');
+            /* Ganti sesuai path gambar */
             background-size: cover;
             background-position: center;
             height: 200px;
@@ -100,7 +105,7 @@
         .card {
             background: #fff;
             border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
             width: 200px;
             padding: 20px;
         }
@@ -183,6 +188,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="top-bar">
@@ -334,4 +340,5 @@
     </footer>
 
 </body>
+
 </html>
