@@ -27,7 +27,7 @@
         <div class="v292_616"></div>
       </div>
       <div class="v292_617">
-        <div class="v292_618"></div><span class="v292_619">ALMADA LAUNDRY UPDATE</span>
+        <div class="v292_618"></div><span class="v292_619">ALMADA LAUNDRY UPDATE 2</span>
         <div class="v292_620"></div><a href="{{ route('home') }}"><span class="v292_621">HOME</span></a>
         <div class="v292_622"></div>
         <div class="v292_623"></div>
