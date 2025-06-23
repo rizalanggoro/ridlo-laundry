@@ -1,0 +1,19 @@
+services:
+    web:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        depends_on:
+            - database
+        ports:
+            - "3000:80"
+    database:
+        image: mysql:8.0.41-debian
+        # ports:
+        #     - "3003:3306"
+        environment:
+            MYSQL_ALLOW_EMPTY_PASSWORD: true
+        volumes:
+            - dbdata:/var/lib/mysql
+volumes:
+    dbdata:
